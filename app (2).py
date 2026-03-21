@@ -188,13 +188,13 @@ svg.ring{transform:rotate(-90deg);}
 
 /* ══ ZALO NOTI ══ */
 #zalo-noti{
-  position:fixed;bottom:28px;right:20px;width:320px;z-index:9999;
+  position:fixed;top:490px;right:20px;width:320px;z-index:9999;
   font-family:'Be Vietnam Pro',sans-serif;
-  transform:translateY(120%);opacity:0;
-  transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .35s ease;
+  transform:translateX(calc(100% + 28px));opacity:0;
+  transition:transform .48s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;
   pointer-events:none;
 }
-#zalo-noti.show{transform:translateY(0);opacity:1;pointer-events:all;}
+#zalo-noti.show{transform:translateX(0);opacity:1;pointer-events:all;}
 .zalo-card{background:#fff;border-radius:18px;box-shadow:0 16px 48px rgba(0,100,200,0.18),0 4px 16px rgba(0,0,0,0.1);overflow:hidden;border:1.5px solid #d4e8fb;}
 .zalo-header{background:linear-gradient(90deg,#0068ff,#1a90ff);padding:10px 14px;display:flex;align-items:center;gap:10px;}
 .zalo-logo{width:28px;height:28px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#0068ff;font-family:sans-serif;flex-shrink:0;}
@@ -637,4 +637,4 @@ document.getElementById('email-input').addEventListener('focus', function() {
 </body>
 </html>"""
 
-components.html(HTML, height=920, scrolling=True)
+components.html(HTML, height=860, scrolling=True)
