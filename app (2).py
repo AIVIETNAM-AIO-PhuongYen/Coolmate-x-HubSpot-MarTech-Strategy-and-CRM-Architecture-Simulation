@@ -7,6 +7,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# ── Ẩn chrome Streamlit ──────────────────────────────────────────────────────
 st.markdown("""
 <style>
 #MainMenu, footer, header { visibility: hidden; }
@@ -14,13 +15,207 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# ZALO POPUP — sống NGOÀI iframe, fixed vào browser viewport thật
+# Nhận tín hiệu từ iframe qua postMessage
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap');
+
+/* ── ZALO POPUP (ngoài iframe, fixed thật) ── */
+#zalo-popup {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: 330px;
+  z-index: 99999;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  transform: translateX(-120%);
+  opacity: 0;
+  transition: transform .5s cubic-bezier(.34,1.56,.64,1), opacity .32s ease;
+  pointer-events: none;
+}
+#zalo-popup.show {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: all;
+}
+.zp-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,104,255,0.18), 0 4px 18px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border: 1.5px solid #d4e8fb;
+}
+.zp-header {
+  background: linear-gradient(90deg,#0068ff,#1a90ff);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.zp-logo {
+  width: 28px; height: 28px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; color: #0068ff;
+  font-family: sans-serif; flex-shrink: 0;
+}
+.zp-header-txt { flex: 1; }
+.zp-app-name { font-size: 11px; font-weight: 700; color: #fff; }
+.zp-sub { font-size: 10px; color: rgba(255,255,255,.65); }
+.zp-close {
+  background: rgba(255,255,255,.2); border: none; color: #fff;
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  font-size: 13px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s; flex-shrink: 0;
+}
+.zp-close:hover { background: rgba(255,255,255,.38); }
+.zp-body { padding: 14px 16px 10px; }
+.zp-sender { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.zp-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg,#5bbfb5,#7ab8e8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.zp-sname { font-size: 13px; font-weight: 700; color: #334155; }
+.zp-slabel { font-size: 10.5px; color: #7a8ea8; }
+.zp-bubble {
+  background: #f0f7ff;
+  border-radius: 4px 16px 16px 16px;
+  padding: 11px 14px;
+  font-size: 13.5px; color: #334155; line-height: 1.6;
+  border: 1px solid #d4e8fb;
+  position: relative;
+}
+.zp-bubble::before {
+  content: ''; position: absolute; top: 0; left: -7px;
+  border: 7px solid transparent;
+  border-right-color: #d4e8fb;
+  border-top-color: #d4e8fb;
+}
+.zp-bubble .hi  { color: #0068ff; font-weight: 700; }
+.zp-bubble .vc  {
+  display: inline-block;
+  background: #fff4e0; color: #c97a28; font-weight: 700;
+  padding: 1px 7px; border-radius: 6px; font-size: 12.5px;
+  border: 1px dashed #f4b860; margin: 0 2px;
+}
+.zp-time { font-size: 10px; color: #7a8ea8; text-align: right; padding: 4px 16px 8px; }
+.zp-footer { display: flex; gap: 8px; padding: 0 14px 14px; }
+.zp-btn-cta {
+  flex: 1;
+  background: linear-gradient(90deg,#0068ff,#1a90ff);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 9px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: opacity .15s;
+}
+.zp-btn-cta:hover { opacity: .88; }
+.zp-btn-later {
+  background: #f4f6f8; color: #7a8ea8; border: none;
+  border-radius: 10px; padding: 9px 14px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; white-space: nowrap;
+}
+.zp-btn-later:hover { background: #dde4ed; }
+.zp-ping {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; background: #22c55e;
+  vertical-align: middle; margin-right: 4px;
+  animation: zpPing 1.5s infinite;
+}
+@keyframes zpPing {
+  0%,100% { box-shadow: 0 0 0 2px rgba(34,197,94,.3); }
+  50%      { box-shadow: 0 0 0 5px rgba(34,197,94,.1); }
+}
+</style>
+
+<div id="zalo-popup">
+  <div class="zp-card">
+    <div class="zp-header">
+      <div class="zp-logo">Z</div>
+      <div class="zp-header-txt">
+        <div class="zp-app-name">Zalo · Coolmate Official</div>
+        <div class="zp-sub"><span class="zp-ping"></span>vừa nhắn tin cho bạn</div>
+      </div>
+      <button class="zp-close" onclick="zpDismiss()">✕</button>
+    </div>
+    <div class="zp-body">
+      <div class="zp-sender">
+        <div class="zp-avatar">CM</div>
+        <div>
+          <div class="zp-sname">Coolmate CSKH</div>
+          <div class="zp-slabel">Nhân viên tư vấn · Online ngay</div>
+        </div>
+      </div>
+      <div class="zp-bubble" id="zp-msg">...</div>
+    </div>
+    <div class="zp-time" id="zp-time">vừa xong</div>
+    <div class="zp-footer">
+      <button class="zp-btn-cta" onclick="zpDismiss()">Đặt hàng ngay 🛒</button>
+      <button class="zp-btn-later" onclick="zpDismiss()">Để sau</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Nội dung Zalo theo milestone ─────────────────────
+const ZP_MSGS = {
+  20: `<span class='hi'>Minh Hoàng ơi!</span> 👋<br>
+       Mình thấy bạn đang xem <b>Tech-Wear</b> — vải Ex-Dry mặc cả ngày không bị mùi luôn!<br><br>
+       Dùng mã <span class='vc'>FREESHIP</span> miễn phí vận chuyển đơn đầu tiên. Hết hạn <b>hôm nay</b>! ⏰`,
+  40: `<span class='hi'>Minh Hoàng ơi!</span> 🎉<br>
+       HubSpot ghi nhận bạn là <b>MQL</b> rồi — bạn đang cân nhắc thật sự đó!<br><br>
+       Tặng riêng mã <span class='vc'>VIP15</span> giảm thêm <b>15%</b> cho Combo Tech-Wear. Chỉ còn <b>3 suất</b> hôm nay! 👑`,
+  70: `<span class='hi'>Minh Hoàng ơi!</span> 🚀<br>
+       Score đạt <b>SQL</b> rồi — CSKH đang online, sẵn sàng tư vấn 1:1 ngay!<br><br>
+       Đặt trong <b>30 phút</b> để nhận <span class='vc'>GYMSET</span> tặng kèm <b>túi gym miễn phí</b>. Chỉ 2 suất! 🎁`
+};
+
+let zpTimer = null;
+
+function zpShow(milestone) {
+  clearTimeout(zpTimer);
+  const msg = ZP_MSGS[milestone];
+  if (!msg) return;
+  document.getElementById('zp-msg').innerHTML = msg;
+  const now = new Date();
+  document.getElementById('zp-time').textContent =
+    now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + ' · vừa xong';
+  document.getElementById('zalo-popup').classList.add('show');
+  zpTimer = setTimeout(zpDismiss, 9000);
+}
+
+function zpDismiss() {
+  clearTimeout(zpTimer);
+  document.getElementById('zalo-popup').classList.remove('show');
+}
+
+// ── Lắng nghe postMessage từ iframe ──────────────────
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.source !== 'coolmate-iframe') return;
+  if (e.data.type === 'zalo-show')    zpShow(e.data.milestone);
+  if (e.data.type === 'zalo-dismiss') zpDismiss();
+});
+</script>
+""", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# IFRAME — website giả lập. Zalo popup đã được tách ra ngoài.
+# Dùng postMessage để báo hiệu cho parent.
+# ═══════════════════════════════════════════════════════════════════════════════
 HTML = r"""<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Coolmate — Tech-Wear</title>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -28,17 +223,17 @@ HTML = r"""<!DOCTYPE html>
   --teal:#5bbfb5; --teal-l:#e0f5f3; --teal-d:#429b93;
   --orange:#f4a27c; --orange-d:#e8875a;
   --gray:#f4f6f8; --gray-2:#eef1f5;
-  --dark:#334155; --mid:#7a8ea8; --border:#dde4ed; --white:#fff;
+  --dark:#334155; --mid:#7a8ea8; --border:#dde4ed;
   --purple:#9b85d4; --sky:#7ab8e8;
 }
 body{font-family:'Be Vietnam Pro',sans-serif;background:#f7f9fc;color:var(--dark);}
 
 /* TOPBAR */
-.topbar{background:linear-gradient(90deg,var(--navy-d),var(--navy));color:rgba(255,255,255,0.7);font-size:12px;text-align:center;padding:7px 0;letter-spacing:.04em;}
+.topbar{background:linear-gradient(90deg,var(--navy-d),var(--navy));color:rgba(255,255,255,.7);font-size:12px;text-align:center;padding:7px 0;letter-spacing:.04em;}
 .topbar span{color:#a8e6e1;}
 
 /* NAV */
-nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);z-index:100;box-shadow:0 1px 12px rgba(59,78,110,0.07);}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);z-index:100;box-shadow:0 1px 12px rgba(59,78,110,.07);}
 .logo{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.5px;cursor:pointer;}
 .logo span{color:var(--teal);}
 .nav-links{display:flex;gap:28px;}
@@ -51,22 +246,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px
 .badge{position:absolute;top:-4px;right:-4px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
 
 /* HERO */
-.hero{background:linear-gradient(135deg,var(--navy-d) 55%,#4a6280);color:#fff;padding:60px 40px;display:flex;align-items:center;gap:60px;position:relative;overflow:hidden;}
-.hero-text{flex:1;position:relative;}
-.hero-badge{display:inline-block;background:rgba(91,191,181,0.2);border:1px solid rgba(91,191,181,0.4);color:#a8e6e1;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:16px;}
+.hero{background:linear-gradient(135deg,var(--navy-d) 55%,#4a6280);color:#fff;padding:60px 40px;display:flex;align-items:center;gap:60px;}
+.hero-text{flex:1;}
+.hero-badge{display:inline-block;background:rgba(91,191,181,.2);border:1px solid rgba(91,191,181,.4);color:#a8e6e1;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:16px;}
 .hero h1{font-size:40px;font-weight:800;line-height:1.15;margin-bottom:14px;}
 .hero h1 em{color:#a8e6e1;font-style:normal;}
-.hero p{font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;max-width:440px;margin-bottom:28px;}
+.hero p{font-size:15px;color:rgba(255,255,255,.6);line-height:1.7;max-width:440px;margin-bottom:28px;}
 .hero-btns{display:flex;gap:12px;}
 .btn{padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit;}
 .btn-primary{background:var(--teal);color:#fff;}
-.btn-primary:hover{background:var(--teal-d);transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,191,181,0.35);}
-.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.3);}
-.btn-outline:hover{background:rgba(255,255,255,0.08);}
-.hero-img{width:320px;height:360px;background:rgba(255,255,255,0.06);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,0.12);}
-.hero-img:hover{background:rgba(255,255,255,0.1);transform:translateY(-4px);}
+.btn-primary:hover{background:var(--teal-d);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3);}
+.btn-outline:hover{background:rgba(255,255,255,.08);}
+.hero-img{width:320px;height:360px;background:rgba(255,255,255,.06);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.12);}
+.hero-img:hover{background:rgba(255,255,255,.1);transform:translateY(-4px);}
 .hero-img-icon{font-size:80px;margin-bottom:12px;}
-.hero-img-label{font-size:13px;color:rgba(255,255,255,0.35);}
+.hero-img-label{font-size:13px;color:rgba(255,255,255,.35);}
 
 /* TRUST */
 .trust{display:flex;border-bottom:1px solid var(--border);background:#fff;}
@@ -84,7 +279,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px
 .section-head a{font-size:13px;color:var(--teal);cursor:pointer;font-weight:600;}
 .products{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
 .product-card{border:1.5px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .22s;background:#fff;}
-.product-card:hover{box-shadow:0 10px 36px rgba(59,78,110,0.12);transform:translateY(-4px);border-color:var(--teal);}
+.product-card:hover{box-shadow:0 10px 36px rgba(59,78,110,.12);transform:translateY(-4px);border-color:var(--teal);}
 .product-thumb{height:200px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;}
 .product-tag{position:absolute;top:10px;left:10px;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--orange);}
 .product-tag.new{background:var(--teal);}
@@ -121,10 +316,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px
 .size-btn:hover,.size-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
 .color-row{display:flex;gap:10px;margin-bottom:24px;}
 .color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.color-dot:hover,.color-dot.active{border-color:var(--navy);transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.color-dot:hover,.color-dot.active{border-color:var(--navy);transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,.15);}
 .pd-btns{display:flex;gap:12px;margin-bottom:20px;}
 .btn-buy{flex:1;background:var(--orange);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
-.btn-buy:hover{background:var(--orange-d);transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,162,124,0.4);}
+.btn-buy:hover{background:var(--orange-d);transform:translateY(-2px);}
 .btn-cart{flex:1;background:var(--navy);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
 .btn-cart:hover{background:var(--teal);}
 .pd-guarantee{display:flex;gap:16px;padding:16px;background:#fff;border-radius:12px;border:1px solid var(--border);}
@@ -145,24 +340,24 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px
 /* SIGNUP */
 .signup-section{background:linear-gradient(135deg,var(--navy-d),#4a6280);padding:56px 40px;display:flex;align-items:center;justify-content:space-between;gap:40px;}
 .signup-text h2{font-size:26px;font-weight:800;color:#fff;margin-bottom:8px;}
-.signup-text p{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;}
+.signup-text p{font-size:14px;color:rgba(255,255,255,.55);line-height:1.6;}
 .signup-form{display:flex;gap:10px;min-width:400px;}
-.signup-input{flex:1;padding:13px 16px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;}
-.signup-input::placeholder{color:rgba(255,255,255,0.35);}
+.signup-input{flex:1;padding:13px 16px;border-radius:10px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;}
+.signup-input::placeholder{color:rgba(255,255,255,.35);}
 .signup-input:focus{border-color:var(--teal);}
-.btn-signup{background:var(--teal);color:#fff;border:none;padding:13px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s;}
+.btn-signup{background:var(--teal);color:#fff;border:none;padding:13px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .btn-signup:hover{background:var(--teal-d);}
 
 /* FOOTER */
-footer{background:var(--navy-d);color:rgba(255,255,255,0.45);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;}
+footer{background:var(--navy-d);color:rgba(255,255,255,.45);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;}
 footer .logo{color:#fff;font-size:18px;}
 .footer-links{display:flex;gap:24px;}
-.footer-links a{font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color .15s;}
+.footer-links a{font-size:13px;color:rgba(255,255,255,.4);cursor:pointer;transition:color .15s;}
 .footer-links a:hover{color:#fff;}
 footer p{font-size:12px;}
 
 /* ══ LEAD WIDGET ══ */
-#lead-widget{position:fixed;right:20px;top:88px;background:#fff;border-radius:16px;width:212px;box-shadow:0 8px 32px rgba(59,78,110,0.18);z-index:998;overflow:hidden;border:1.5px solid var(--border);}
+#lead-widget{position:fixed;right:20px;top:88px;background:#fff;border-radius:16px;width:212px;box-shadow:0 8px 32px rgba(59,78,110,.18);z-index:998;overflow:hidden;border:1.5px solid var(--border);}
 .widget-header{background:linear-gradient(90deg,var(--teal-d),var(--sky));padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;}
 .widget-body{padding:14px;}
 .score-ring-wrap{display:flex;justify-content:center;margin-bottom:6px;}
@@ -174,7 +369,7 @@ svg.ring{transform:rotate(-90deg);}
 .score-label{font-size:11px;color:var(--mid);}
 .score-bar-bg{height:7px;background:var(--gray);border-radius:4px;margin:10px 0 6px;overflow:hidden;}
 .score-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--sky));transition:width .45s cubic-bezier(.4,0,.2,1);}
-.score-status{font-size:11px;font-weight:700;margin-bottom:10px;padding:3px 8px;border-radius:20px;display:inline-block;}
+.score-status{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;display:inline-block;margin-bottom:10px;}
 .score-status.cold{background:#e8f3fe;color:#4a88c7;}
 .score-status.warm{background:#fff4e0;color:#c97a28;}
 .score-status.mql{background:#e0f8f0;color:#2a9e72;}
@@ -186,43 +381,8 @@ svg.ring{transform:rotate(-90deg);}
 .log-action{color:var(--mid);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .log-pts{background:var(--teal-l);color:var(--teal-d);font-weight:700;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;flex-shrink:0;}
 
-/* ══ ZALO NOTI ══ */
-#zalo-noti{
-  position:fixed;top:490px;right:20px;width:320px;z-index:9999;
-  font-family:'Be Vietnam Pro',sans-serif;
-  transform:translateX(calc(100% + 28px));opacity:0;
-  transition:transform .48s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;
-  pointer-events:none;
-}
-#zalo-noti.show{transform:translateX(0);opacity:1;pointer-events:all;}
-.zalo-card{background:#fff;border-radius:18px;box-shadow:0 16px 48px rgba(0,100,200,0.18),0 4px 16px rgba(0,0,0,0.1);overflow:hidden;border:1.5px solid #d4e8fb;}
-.zalo-header{background:linear-gradient(90deg,#0068ff,#1a90ff);padding:10px 14px;display:flex;align-items:center;gap:10px;}
-.zalo-logo{width:28px;height:28px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#0068ff;font-family:sans-serif;flex-shrink:0;}
-.zalo-header-text{flex:1;}
-.zalo-app-name{font-size:11px;font-weight:700;color:#fff;}
-.zalo-header-sub{font-size:10px;color:rgba(255,255,255,0.65);}
-.zalo-dismiss{background:rgba(255,255,255,0.2);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
-.zalo-dismiss:hover{background:rgba(255,255,255,0.35);}
-.zalo-body{padding:14px 16px 10px;}
-.zalo-sender{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.zalo-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5bbfb5,#7ab8e8);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;}
-.zalo-sender-name{font-size:13px;font-weight:700;color:#334155;}
-.zalo-sender-label{font-size:10.5px;color:#7a8ea8;}
-.zalo-bubble{background:#f0f7ff;border-radius:4px 16px 16px 16px;padding:11px 14px;font-size:13.5px;color:#334155;line-height:1.6;border:1px solid #d4e8fb;position:relative;}
-.zalo-bubble::before{content:'';position:absolute;top:0;left:-7px;border:7px solid transparent;border-right-color:#d4e8fb;border-top-color:#d4e8fb;}
-.zalo-bubble .hi{color:#0068ff;font-weight:700;}
-.zalo-bubble .voucher{display:inline-block;background:#fff4e0;color:#c97a28;font-weight:700;padding:1px 7px;border-radius:6px;font-size:12.5px;border:1px dashed #f4b860;margin:0 2px;}
-.zalo-time{font-size:10px;color:var(--mid);text-align:right;padding:4px 16px 8px;}
-.zalo-footer{display:flex;gap:8px;padding:0 14px 14px;}
-.zalo-btn-cta{flex:1;background:linear-gradient(90deg,#0068ff,#1a90ff);color:#fff;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;}
-.zalo-btn-cta:hover{opacity:.88;}
-.zalo-btn-later{background:var(--gray);color:var(--mid);border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
-.zalo-btn-later:hover{background:var(--border);}
-.ping{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;vertical-align:middle;margin-right:4px;animation:pingA 1.5s infinite;}
-@keyframes pingA{0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,.3);}50%{box-shadow:0 0 0 5px rgba(34,197,94,.1);}}
-
-/* FLASH */
-.flash{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:#fff;color:var(--dark);border-radius:12px;padding:9px 20px;font-size:13px;font-weight:600;z-index:1001;animation:flashA .95s ease both;pointer-events:none;white-space:nowrap;border:1.5px solid var(--border);display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(59,78,110,0.14);}
+/* FLASH (bên trong iframe) */
+.flash{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:#fff;color:var(--dark);border-radius:12px;padding:9px 20px;font-size:13px;font-weight:600;z-index:1001;animation:flashA .95s ease both;pointer-events:none;white-space:nowrap;border:1.5px solid var(--border);display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(59,78,110,.14);}
 .flash-pts{color:var(--teal-d);font-size:15px;font-weight:700;}
 @keyframes flashA{0%{opacity:0;transform:translateX(-50%) translateY(-10px);}18%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;transform:translateX(-50%) translateY(-6px);}}
 .m-flash{position:fixed;top:72px;left:50%;transform:translateX(-50%);color:#fff;border-radius:12px;padding:10px 22px;font-size:14px;font-weight:700;z-index:1002;pointer-events:none;white-space:nowrap;animation:flashA 2.2s ease both;}
@@ -231,35 +391,6 @@ svg.ring{transform:rotate(-90deg);}
 </style>
 </head>
 <body>
-
-<!-- ══ ZALO NOTIFICATION ══ -->
-<div id="zalo-noti">
-  <div class="zalo-card">
-    <div class="zalo-header">
-      <div class="zalo-logo">Z</div>
-      <div class="zalo-header-text">
-        <div class="zalo-app-name">Zalo · Coolmate Official</div>
-        <div class="zalo-header-sub"><span class="ping"></span>vừa nhắn tin cho bạn</div>
-      </div>
-      <button class="zalo-dismiss" onclick="dismissZalo()">✕</button>
-    </div>
-    <div class="zalo-body">
-      <div class="zalo-sender">
-        <div class="zalo-avatar">CM</div>
-        <div>
-          <div class="zalo-sender-name">Coolmate CSKH</div>
-          <div class="zalo-sender-label">Nhân viên tư vấn · Online ngay</div>
-        </div>
-      </div>
-      <div class="zalo-bubble" id="zalo-msg">Ơi ơi 👋</div>
-    </div>
-    <div class="zalo-time" id="zalo-time">vừa xong</div>
-    <div class="zalo-footer">
-      <button class="zalo-btn-cta" onclick="dismissZalo()">Đặt hàng ngay 🛒</button>
-      <button class="zalo-btn-later" onclick="dismissZalo()">Để sau</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ LEAD WIDGET ══ -->
 <div id="lead-widget">
@@ -339,7 +470,7 @@ svg.ring{transform:rotate(-90deg);}
 <!-- TRUST -->
 <div class="trust">
   <div class="trust-item" data-action="Xem thông tin Ex-Dry" data-pts="4"><span class="trust-icon">💧</span><div class="trust-text"><strong>Công nghệ Ex-Dry</strong><span>Thấm hút cực nhanh</span></div></div>
-  <div class="trust-item" data-action="Xem thông tin Anti-Smell" data-pts="4"><span class="trust-icon">🛡️</span><div class="trust-text"><strong>Anti-Smell 24h</strong><span>Kháng khuẩn, khử mùi</span></div></div>
+  <div class="trust-item" data-action="Xem Anti-Smell" data-pts="4"><span class="trust-icon">🛡️</span><div class="trust-text"><strong>Anti-Smell 24h</strong><span>Kháng khuẩn, khử mùi</span></div></div>
   <div class="trust-item" data-action="Xem chính sách đổi trả" data-pts="6"><span class="trust-icon">🔄</span><div class="trust-text"><strong>Đổi trả 30 ngày</strong><span>Không cần lý do</span></div></div>
   <div class="trust-item" data-action="Xem cam kết chính hãng" data-pts="3"><span class="trust-icon">✅</span><div class="trust-text"><strong>Hàng chính hãng</strong><span>Made in Vietnam</span></div></div>
 </div>
@@ -384,7 +515,7 @@ svg.ring{transform:rotate(-90deg);}
         </div>
       </div>
     </div>
-    <div class="product-card" data-action="Xem Combo Tech-Wear Office" data-pts="7">
+    <div class="product-card" data-action="Xem Combo Tech-Wear" data-pts="7">
       <div class="product-thumb" style="background:#f3effb;"><div class="product-tag" style="background:#9b85d4;">Combo</div>🎁</div>
       <div class="product-info">
         <div class="product-name">Combo Tech-Wear Office</div>
@@ -401,7 +532,7 @@ svg.ring{transform:rotate(-90deg);}
 
 <!-- PRODUCT DETAIL -->
 <div class="product-detail">
-  <div class="pd-img" data-action="Xem ảnh chi tiết sản phẩm" data-pts="6">👕</div>
+  <div class="pd-img" data-action="Xem ảnh chi tiết" data-pts="6">👕</div>
   <div>
     <div class="pd-badge">Bestseller · 4.8★ · 1.240 đánh giá</div>
     <div class="pd-name">Áo Polo Ex-Dry Kỹ Thuật Pro 2025</div>
@@ -416,7 +547,7 @@ svg.ring{transform:rotate(-90deg);}
     <div class="pd-section-label">Công nghệ</div>
     <div class="pd-tech">
       <div class="tech-badge active" data-action="Xem công nghệ Ex-Dry" data-pts="5">⚡ Ex-Dry</div>
-      <div class="tech-badge" data-action="Xem công nghệ Anti-Smell" data-pts="5">🛡️ Anti-Smell</div>
+      <div class="tech-badge" data-action="Xem Anti-Smell" data-pts="5">🛡️ Anti-Smell</div>
       <div class="tech-badge" data-action="Xem co giãn 4D" data-pts="5">🔄 Co giãn 4D</div>
       <div class="tech-badge" data-action="Xem bảng size" data-pts="6">📐 Bảng size</div>
     </div>
@@ -438,7 +569,7 @@ svg.ring{transform:rotate(-90deg);}
     </div>
     <div class="pd-btns">
       <button class="btn-buy" data-action="Mua ngay — Polo Ex-Dry" data-pts="25">⚡ Mua ngay</button>
-      <button class="btn-cart" data-action="Thêm giỏ — Polo Ex-Dry chi tiết" data-pts="15">🛒 Thêm giỏ</button>
+      <button class="btn-cart" data-action="Thêm giỏ — Polo chi tiết" data-pts="15">🛒 Thêm giỏ</button>
     </div>
     <div class="pd-guarantee">
       <div class="guarantee-item"><span>🔄</span><span>Đổi trả 30 ngày</span></div>
@@ -454,15 +585,15 @@ svg.ring{transform:rotate(-90deg);}
   <div class="review-grid">
     <div class="review-card" data-action="Đọc review Minh Hoàng" data-pts="4">
       <div class="review-header"><div class="review-avatar">MH</div><div><div class="review-name">Minh Hoàng</div><div class="review-date">★★★★★ · 2 ngày trước</div></div></div>
-      <div class="review-body">Mặc đi làm cả ngày rồi đi gym luôn vẫn không bị mùi. Vải thoáng mát, form áo đẹp. Sẽ mua thêm màu khác!</div>
+      <div class="review-body">Mặc đi làm cả ngày rồi đi gym luôn vẫn không bị mùi. Vải thoáng mát, form áo đẹp!</div>
     </div>
     <div class="review-card" data-action="Đọc review Thu Hằng" data-pts="4">
       <div class="review-header"><div class="review-avatar" style="background:var(--teal);">TH</div><div><div class="review-name">Thu Hằng</div><div class="review-date">★★★★★ · 5 ngày trước</div></div></div>
-      <div class="review-body">Mua tặng chồng, anh ấy thích lắm. Vải mềm, co giãn tốt. Ship nhanh, đóng gói cẩn thận. 5 sao không đắn đo!</div>
+      <div class="review-body">Mua tặng chồng, anh ấy thích lắm. Vải mềm, co giãn tốt. 5 sao không đắn đo!</div>
     </div>
     <div class="review-card" data-action="Đọc review Đức Anh" data-pts="4">
       <div class="review-header"><div class="review-avatar" style="background:var(--orange);">ĐA</div><div><div class="review-name">Đức Anh</div><div class="review-date">★★★★☆ · 1 tuần trước</div></div></div>
-      <div class="review-body">Chất lượng ổn, đúng như mô tả. Giá hơi cao nhưng bù lại bền và thoải mái. Đã mua lần 3 vẫn chưa thất vọng.</div>
+      <div class="review-body">Chất lượng ổn, đúng như mô tả. Đã mua lần 3 vẫn chưa thất vọng.</div>
     </div>
   </div>
 </div>
@@ -471,7 +602,7 @@ svg.ring{transform:rotate(-90deg);}
 <div class="signup-section">
   <div class="signup-text">
     <h2>Nhận ưu đãi độc quyền CoolClub</h2>
-    <p>Đăng ký nhận thông báo sản phẩm mới, voucher thành viên<br>và tips mặc đẹp mỗi tuần.</p>
+    <p>Đăng ký nhận voucher thành viên và tips mặc đẹp mỗi tuần.</p>
   </div>
   <div class="signup-form">
     <input class="signup-input" type="email" placeholder="Nhập email của bạn..."
@@ -484,10 +615,10 @@ svg.ring{transform:rotate(-90deg);}
 <footer>
   <div class="logo" data-action="Click logo footer" data-pts="1">Cool<span style="color:var(--teal)">mate</span></div>
   <div class="footer-links">
-    <a data-action="Chính sách bảo mật" data-pts="4">Chính sách bảo mật</a>
-    <a data-action="Điều khoản sử dụng" data-pts="3">Điều khoản</a>
+    <a data-action="Chính sách bảo mật" data-pts="4">Bảo mật</a>
+    <a data-action="Điều khoản" data-pts="3">Điều khoản</a>
     <a data-action="Liên hệ hỗ trợ" data-pts="6">Liên hệ</a>
-    <a data-action="Câu hỏi thường gặp" data-pts="5">FAQ</a>
+    <a data-action="FAQ" data-pts="5">FAQ</a>
   </div>
   <p>© 2025 Coolmate. Made in Vietnam 🇻🇳</p>
 </footer>
@@ -495,24 +626,7 @@ svg.ring{transform:rotate(-90deg);}
 <script>
 let score = 0, MAX = 100;
 const logItems = [];
-let zaloTimer = null;
-
 const CIRCUMF = 182.21;
-
-// ── Zalo messages per milestone
-const ZALO = {
-  20: `<span class="hi">Minh Hoàng ơi!</span> 👋<br>
-       Mình thấy bạn đang xem bộ <b>Tech-Wear</b> — vải Ex-Dry mặc cả ngày không bị mùi luôn nha!<br><br>
-       Dùng mã <span class="voucher">FREESHIP</span> miễn phí vận chuyển cho đơn đầu tiên. Hết hạn <b>hôm nay</b> thôi! ⏰`,
-
-  40: `<span class="hi">Minh Hoàng ơi!</span> 🎉<br>
-       HubSpot vừa ghi nhận bạn là <b>MQL</b> rồi — nghĩa là bạn đang cân nhắc thật sự đó!<br><br>
-       Tặng riêng bạn mã <span class="voucher">VIP15</span> giảm thêm <b>15%</b> cho Combo Tech-Wear Office. Chỉ còn <b>3 suất</b> hôm nay nhé! 👑`,
-
-  70: `<span class="hi">Minh Hoàng ơi!</span> 🚀<br>
-       Score của bạn vừa đạt <b>SQL</b> — CSKH Coolmate đang online và sẵn sàng tư vấn 1:1 ngay!<br><br>
-       Đặt hàng trong <b>30 phút</b> để nhận mã <span class="voucher">GYMSET</span> tặng kèm <b>túi gym miễn phí</b>. Chỉ 2 suất cuối! 🎁`
-};
 
 const MILESTONES = {
   20: { label:'🔥 Warm Lead! HubSpot bắt đầu theo dõi', color:'#f4a27c' },
@@ -535,7 +649,6 @@ function addScore(pts, action) {
   document.getElementById('score-num').textContent = score;
   document.getElementById('score-num').classList.add('pulse');
   setTimeout(() => document.getElementById('score-num').classList.remove('pulse'), 300);
-
   document.getElementById('score-bar').style.width = (pct * 100) + '%';
   document.getElementById('ring-fg').style.strokeDashoffset = CIRCUMF * (1 - pct);
 
@@ -544,11 +657,15 @@ function addScore(pts, action) {
   ss.className = 'score-status ' + cls;
   ss.textContent = txt;
 
-  // Milestone triggers
+  // Milestone — gửi postMessage lên parent Streamlit
   [20, 40, 70].forEach(m => {
     if (prev < m && score >= m) {
       showMFlash(MILESTONES[m].label, MILESTONES[m].color);
-      triggerZalo(m);
+      // ▶▶ postMessage ra ngoài iframe ◀◀
+      window.parent.postMessage(
+        { source: 'coolmate-iframe', type: 'zalo-show', milestone: m },
+        '*'
+      );
     }
   });
 
@@ -584,31 +701,11 @@ function showMFlash(label, color) {
   }, 220);
 }
 
-// ── Zalo popup ────────────────────────────────────────
-function triggerZalo(milestone) {
-  clearTimeout(zaloTimer);
-  document.getElementById('zalo-msg').innerHTML = ZALO[milestone];
-  const now = new Date();
-  document.getElementById('zalo-time').textContent =
-    `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} · vừa xong`;
-
-  setTimeout(() => {
-    document.getElementById('zalo-noti').classList.add('show');
-    zaloTimer = setTimeout(dismissZalo, 9000);
-  }, 900);
-}
-
-function dismissZalo() {
-  clearTimeout(zaloTimer);
-  document.getElementById('zalo-noti').classList.remove('show');
-}
-
-// ── Event delegation ──────────────────────────────────
+// Click delegation
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-pts]');
   if (!el) return;
   addScore(parseInt(el.dataset.pts), el.dataset.action || el.textContent.trim().slice(0,30));
-
   if (el.classList.contains('size-btn')) {
     el.closest('.size-row').querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
