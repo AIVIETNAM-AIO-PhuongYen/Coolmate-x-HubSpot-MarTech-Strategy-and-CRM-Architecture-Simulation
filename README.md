@@ -26,12 +26,12 @@ Kho lưu trữ dữ liệu mô phỏng chiến dịch:
 - `T0_Pre-Campaign.csv`: Dữ liệu thực trạng hệ thống trước khi triển khai MarTech.
 - `T1-T6_Post-Campaign.csv`: Chuỗi dữ liệu theo dõi mức độ phát triển và hiệu quả sau chiến dịch (T0 đến T6).
 
-### 4. [Phân tích & Thực trạng]
+### 4. Phân tích & Thực trạng
 Các tệp phân tích chuyên sâu bằng Python:
 - `COOLMATE_PRE-CAMPAIGN_ANALYTICS.ipynb`: Phân tích EDA về thực trạng hành vi khách hàng và xác định các điểm yếu trong vận hành.
 - `COOLMATE_T0-T6.ipynb`: Mô hình phân tích so sánh và đánh giá mức độ tăng trưởng sau khi áp dụng hệ thống mới.
 
-### 5. [Báo cáo]
+### 5. Báo cáo
 - **Báo cáo chiến dịch Coolmate x HubSpot.pdf**: Tài liệu phân tích chi tiết về chiến lược, ngân sách và lộ trình thực thi.
 - **Slide Chiến dịch Coolmate x HubSpot.pdf**: Bản trình bày tóm tắt các giá trị cốt lõi của dự án.
 
